@@ -6,14 +6,16 @@ let position = [start, 'x']
 let end = [4, 2]
 let road = []
 let crossroad = [];
+
 // console.log(position[0])
 // console.log(labirynthe[0])
 // console.log(labirynthe[1])
+console.table(labirynthe)
 
 while(position[0][0] != end[0] || position[0][1] != end[1]){
     
     let dir = cardinal_points_possible(position)
-
+    
     // check if position is a new position or if already borrow
     // if count == 0 -> new
     let count = 0
@@ -28,6 +30,9 @@ while(position[0][0] != end[0] || position[0][1] != end[1]){
                 crossroad[j][1]=new_dir_to_explore;
                 count ++
             }
+        }
+        if (count == 0){
+            road.push(position[0])
         }
     // check if it's not dead end and if it's a new position    
     if (dir.length >= 1 && count == 0){
@@ -45,7 +50,6 @@ while(position[0][0] != end[0] || position[0][1] != end[1]){
     } else {
         let index_last_crossroad = crossroad.length - 1
         position[0] = crossroad[index_last_crossroad][0]
-        road.push(position[0])
         let array_dir = crossroad[index_last_crossroad][1]
         dir = array_dir[0]
         // if there is no more possibility delete the last index
@@ -58,9 +62,16 @@ while(position[0][0] != end[0] || position[0][1] != end[1]){
     }
     position = shifting(position[0], dir)
 }
+road.push(end)
 console.log('vous avez trouvé la sortie : x: ', end[0], ' y: ', end [1])
 console.log(road)
 console.log('nombre d étapes: ',road.length)
+var path = [[0, 0, 0, 0, 0, 0], [1, 1, 1, 0, 1, 1], [0, 0, 0, 0, 0, 0], [0, 1, 1, 0, 1, 0], [0, 1, 0, 1, 0, 0], [0, 0, 0, 1, 0, 1], [0, 1, 0, 0, 0, 0]]
+for(let i = 0; i<road.length; i++){
+    path[road[i][0]][road[i][1]]= i;
+}
+
+console.table(path)
 function shifting (current_coordinate, direction){
     let new_position = []
     if (direction == 's'){
@@ -76,7 +87,7 @@ function shifting (current_coordinate, direction){
         new_position = [current_coordinate[0]-1, current_coordinate[1]]
     }
     let where_i_come_from = opposit_direction(direction)
-    road.push(new_position)
+    // road.push(new_position)
     return [new_position, where_i_come_from]
 }
 
