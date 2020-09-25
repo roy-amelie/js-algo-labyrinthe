@@ -1,166 +1,120 @@
 "use strict";
-var labirynthe = [[0, 0, 0, 0, 0, 0], [1, 1, 1, 0, 1, 1], [0, 0, 0, 0, 0, 0], [0, 1, 1, 0, 1, 0], [0, 1, 0, 1, 0, 0], [0, 0, 0, 1, 0, 1], [0, 1, 0, 0, 0, 0]]
+var labirynthe = [[0, 0, 0, 0, 0, 0], [-1, -1, -1, 0, -1, -1], [0, 0, 0, 0, 0, 0], [0, -1, -1, 0, -1, 0], [0, -1, 1000, -1, 0, 0], [0, 0, 0, -1, 0, -1], [0, -1, 0, 0, 0, 0]]
 
-let start = [0, 0];
-let position = [start, 'x']
-let end = [4, 2]
+let position = [0, 0];
 let road = []
-let crossroad = [];
-
-// console.log(position[0])
-// console.log(labirynthe[0])
-// console.log(labirynthe[1])
+let path = 1;
+let i =0;
 console.table(labirynthe)
 
-while (position[0][0] != end[0] || position[0][1] != end[1]) {
 
-    let dir = cardinal_points_possible(position)
+road.push(position)
+position = road.shift()
 
-    // check if position is a new position or if already borrow
-    // if count == 0 -> new
-    let count = 0
-    for (let j = 0; j < crossroad.length; j++) {
-        let new_dir_to_explore = []
-        if (crossroad[j][0][0] == position[0][0] && crossroad[j][0][1] == position[0][1]) {
-            for (let k = 0; k < crossroad[j][1].length; k++) {
-                if (crossroad[j][1][k] != position[1]) {
-                    new_dir_to_explore.push(crossroad[j][1][k])
-                }
-            }
-            crossroad[j][1] = new_dir_to_explore;
-            count++
-        }
+
+while(labirynthe[position[0]][position[1]] != 1000){
+    labirynthe[position[0]][position[1]] = path
+    if(south_exist(position)){
+        road.push([position[0], position[1]+1])
     }
-    if (count == 0) {
-        road.push(position[0])
+    if(east_exist(position)){  
+        road.push([position[0]+1, position[1]])
     }
-    // check if it's not dead end and if it's a new position    
-    if (dir.length >= 1 && count == 0) {
-        // if it's a crossroad add it to the array
-        if (dir.length > 1) {
-            let dir_rest = []
-            for (let i = 1; i < dir.length; i++) {
-                dir_rest.push(dir[i])
-            }
-            crossroad.push([position[0], dir_rest])
-        }
-        // take the first possible direction 
-        dir = dir[0]
-        // return to the first crossroad see
-    } else {
-        if(crossroad[0][1].length == 0){
-            crossroad.shift()
-        }
-        let index_first_crossroad = 0
-        position[0] = crossroad[index_first_crossroad][0]
-        let array_dir = crossroad[index_first_crossroad][1]
-        dir = array_dir[0]
-        // if there is no more possibility delete the fist index
-        if (array_dir.length == 1) {
-            crossroad.shift()
-        } else {
-            let new_dir_possible= []
-            for(let k = 1; k<array_dir.length; k++){
-                new_dir_possible.push(array_dir[k])
-            }
-            crossroad[index_first_crossroad][1] = new_dir_possible;
-        }
+    if(north_exist(position)){
+        road.push([position[0], position[1]-1])
     }
-    position = shifting(position[0], dir)
+    if(west_exist(position)){
+        road.push([position[0]-1, position[1]])
+    }
+     
+   
+    
+
+    if (road.length == 0){
+        break;
+    }
+    position = road.shift()
+    path ++
+    
 }
-road.push(end)
-console.log('vous avez trouvé la sortie : x: ', end[0], ' y: ', end[1])
+console.table(labirynthe)  
+console.log('vous avez trouvé la sortie : x: ', position[0], ' y: ', position[1])
+road = []
+while(labirynthe[position[0]][position[1]] != 1){
+    road.push(position)
+    position = check_before(position)
+}
+road.reverse()
 console.log(road)
-console.log('nombre d étapes: ', road.length)
-var path = [[0, 0, 0, 0, 0, 0], [1, 1, 1, 0, 1, 1], [0, 0, 0, 0, 0, 0], [0, 1, 1, 0, 1, 0], [0, 1, 0, 1, 0, 0], [0, 0, 0, 1, 0, 1], [0, 1, 0, 0, 0, 0]]
-for (let i = 0; i < road.length; i++) {
-    path[road[i][0]][road[i][1]] = i;
+console.log('nombre d étapes: ',road.length)
+
+function check_before(position){
+    let path_before_position =  []
+    let before_position = []
+    // sud
+    if (position[1]<labirynthe[0].length && labirynthe[position[0]][position[1]+1]>0){
+        path_before_position.push(labirynthe[position[0]][position[1]+1])
+        before_position.push([position[0],position[1]+1])
+    }
+    // nord
+    if (position[1]>0 && labirynthe[position[0]][position[1]-1]>0){
+        path_before_position.push(labirynthe[position[0]][position[1]-1])
+        before_position.push([position[0],position[1]-1])
+    }
+    // est
+    if (position[0]<labirynthe.length -1 && labirynthe[position[0] +1][position[1]]>0){
+        path_before_position.push(labirynthe[position[0] +1][position[1]])
+        before_position.push([position[0]+1,position[1]])
+    }
+    // ouest
+    if (position[0]>0 && labirynthe[position[0] -1][position[1]]>0){
+        path_before_position.push(labirynthe[position[0] -1][position[1]])
+        before_position.push([position[0]-1,position[1]])
+    }
+    let index_before = compare(path_before_position)
+    return before_position[index_before]
 }
 
-console.table(path)
-function shifting(current_coordinate, direction) {
-    let new_position = []
-    if (direction == 's') {
-        new_position = [current_coordinate[0], current_coordinate[1] + 1]
+function compare(array){
+    let k=0
+    for(let i = 1; i<array.length;i++){
+        if(array[i]<array[k]){
+            k=i
+        }
     }
-    if (direction == 'e') {
-        new_position = [current_coordinate[0] + 1, current_coordinate[1]]
-    }
-    if (direction == 'n') {
-        new_position = [current_coordinate[0], current_coordinate[1] - 1]
-    }
-    if (direction == 'w') {
-        new_position = [current_coordinate[0] - 1, current_coordinate[1]]
-    }
-    let where_i_come_from = opposit_direction(direction)
-    // road.push(new_position)
-    return [new_position, where_i_come_from]
+    return k
 }
 
-function opposit_direction(direction) {
-    if (direction == 's') {
-        return 'n'
-    }
-    if (direction == 'e') {
-        return 'w'
-    }
-    if (direction == 'n') {
-        return 's'
-    }
-    if (direction == 'w') {
-        return 'e'
-    }
-}
-
-function cardinal_points_possible(position) {
-    let option_list = [];
-    let coordinate = position[0];
-    let direction = position[1];
-    if (south_exist(coordinate) && 's' != direction) {
-        option_list.push('s')
-    }
-    if (east_exist(coordinate) && 'e' != direction) {
-        option_list.push('e')
-    }
-    if (north_exist(coordinate) && 'n' != direction) {
-        option_list.push('n')
-    }
-    if (west_exist(coordinate) && 'w' != direction) {
-        option_list.push('w')
-    }
-    return option_list;
-}
-
-function south_exist(coordinate) {
-    if (coordinate[1] < labirynthe[0].length - 1 && labirynthe[coordinate[0]][coordinate[1] + 1] === 0) {
+function south_exist(coordinate){
+    if (coordinate[1] < labirynthe[0].length -1 && (labirynthe[coordinate[0]][coordinate[1] + 1] === 0 || labirynthe[coordinate[0]][coordinate[1] + 1] === 1000)) {
         return true
     } else {
         return false
     }
 }
 
-function north_exist(coordinate) {
+function north_exist(coordinate){
     let x = coordinate[0]
     let y = coordinate[1]
-    if (y > 0 && labirynthe[x][y - 1] === 0) {
+    if (y > 0 && (labirynthe[x][y-1] === 0 || labirynthe[x][y-1] === 1000)){
         return true
     } else {
         return false
     }
 }
 
-function east_exist(coordinate) {
-    if (coordinate[0] < labirynthe.length - 1 && labirynthe[coordinate[0] + 1][coordinate[1]] === 0) {
+function east_exist(coordinate){
+    if (coordinate[0]<labirynthe.length -1 && (labirynthe[coordinate[0] + 1][coordinate[1]] === 0 || labirynthe[coordinate[0] + 1][coordinate[1]] === 1000)){
         return true
     } else {
         return false
     }
 }
 
-function west_exist(coordinate) {
+function west_exist(coordinate){
     let x = coordinate[0]
     let y = coordinate[1]
-    if (x > 0 && labirynthe[x - 1][y] === 0) {
+    if (x>0 && (labirynthe[x - 1][y] === 0 || labirynthe[x - 1][y] === 1000)){
         return true
     } else {
         return false
